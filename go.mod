@@ -8,12 +8,14 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/zapr v1.2.4
 	github.com/go-logr/zerologr v1.2.3
 	github.com/google/go-containerregistry v0.16.1
 	github.com/magefile/mage v1.15.0
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
+	go.uber.org/zap v1.25.0
 	sigs.k8s.io/controller-runtime v0.16.3
 )
 
