@@ -12,19 +12,19 @@ builds:
   main: main.go
   goarch:
   - amd64
-  binary: fewidentity
-  id: fewidentity
+  binary: {{ cookiecutter.project_slug }}
+  id: {{ cookiecutter.project_slug }}
   ldflags:
   - -s -w
-    -X "github.com/gkwa/fewidentity/version.Version={{ .Version }}"
-    -X "github.com/gkwa/fewidentity/version.Date={{ .CommitDate }}"
-    -X "github.com/gkwa/fewidentity/version.GoVersion={{ .Env.GOVERSION }}"
-    -X "github.com/gkwa/fewidentity/version.ShortGitSHA={{ .ShortCommit }}"
-    -X "github.com/gkwa/fewidentity/version.FullGitSHA={{ .FullCommit }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Version={{ .Version }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Date={{ .CommitDate }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.GoVersion={{ .Env.GOVERSION }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.ShortGitSHA={{ .ShortCommit }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.FullGitSHA={{ .FullCommit }}"
 archives:
 - format: tar.gz
   name_template: |-
-    fewidentity_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64
+    {{ cookiecutter.project_slug }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64
                                {{- else if eq .Arch "386" }}i386
                                {{- else }}
                                {{ .Arch }}
@@ -44,19 +44,19 @@ changelog:
     - '^docs:'
     - '^test:'
 brews:
-- name: fewidentity
+- name: {{ cookiecutter.project_slug }}
   directory: Formula
-  homepage: https://github.com/gkwa/fewidentity
+  homepage: https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}
   repository:
-    owner: gkwa
+    owner: {{ cookiecutter.github_username }}
     name: homebrew-tools
     branch: main
 scoops:
-- name: fewidentity
-  homepage: https://github.com/gkwa/fewidentity
-  description: "Description of the fewidentity project"
+- name: {{ cookiecutter.project_slug }}
+  homepage: https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}
+  description: "Description of the {{ cookiecutter.project_slug }} project"
   license: MIT
   repository:
-    owner: gkwa
+    owner: {{ cookiecutter.github_username }}
     name: scoop-bucket
     branch: master
