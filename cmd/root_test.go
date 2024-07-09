@@ -2,18 +2,21 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
+	"io"
+	"os"
+	"strings"
 	"testing"
 
+	"github.com/gkwa/fewidentity/internal/logger"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 func TestCustomLogger(t *testing.T) {
-	// Create a buffer to capture log output
 	var buf bytes.Buffer
 
-	// Create a custom zap logger
 	zapConfig := zap.NewDevelopmentConfig()
 	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	zapLogger := zap.New(zapcore.NewCore(
@@ -22,13 +25,10 @@ func TestCustomLogger(t *testing.T) {
 		zapcore.DebugLevel,
 	))
 
-	// Create a logr.Logger from the zap logger
 	customLogger := zapr.NewLogger(zapLogger)
 
-	// Set the global cliLogger
 	cliLogger = customLogger
 
-	// Now when we run a command, it should use our custom logger
 	cmd := rootCmd
 	cmd.SetArgs([]string{"version"})
 	err := cmd.Execute()
@@ -36,12 +36,57 @@ func TestCustomLogger(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	// Check if our custom logger was used
 	logOutput := buf.String()
 	if logOutput == "" {
 		t.Error("Expected log output, but got none")
 	}
 
-	// You can add more specific checks on the log output here
+	t.Logf("Log output: %s", logOutput)
+}
+
+func TestJSONLogger(t *testing.T) {
+	oldVerbose, oldLogFormat := verbose, logFormat
+	verbose, logFormat = true, "json"
+	defer func() {
+		verbose, logFormat = oldVerbose, oldLogFormat
+	}()
+
+	oldStderr := os.Stderr
+	r, w, _ := os.Pipe()
+	os.Stderr = w
+
+	customLogger := logger.NewConsoleLogger(verbose, logFormat == "json")
+	cliLogger = customLogger
+
+	cmd := rootCmd
+	cmd.SetArgs([]string{"version"})
+	err := cmd.Execute()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	w.Close()
+	os.Stderr = oldStderr
+
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, r)
+	if err != nil {
+		t.Fatalf("Failed to copy log output: %v", err)
+	}
+	logOutput := buf.String()
+
+	if logOutput == "" {
+		t.Error("Expected log output, but got none")
+	}
+
+	lines := strings.Split(strings.TrimSpace(logOutput), "\n")
+	for _, line := range lines {
+		var jsonMap map[string]interface{}
+		err := json.Unmarshal([]byte(line), &jsonMap)
+		if err != nil {
+			t.Errorf("Expected valid JSON, but got error: %v", err)
+		}
+	}
+
 	t.Logf("Log output: %s", logOutput)
 }

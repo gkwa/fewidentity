@@ -14,29 +14,30 @@ import (
 )
 
 func NewConsoleLogger(verbose bool, jsonFormat bool) logr.Logger {
-	color.NoColor = !verbose
-	zconfig := zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		NoColor:    !verbose,
-		TimeFormat: time.Kitchen,
-	}
+	var zlog zerolog.Logger
 
 	if jsonFormat {
-		zconfig.NoColor = true
-	}
+		zlog = zerolog.New(os.Stderr).With().Timestamp().Logger()
+	} else {
+		color.NoColor = !verbose
+		consoleWriter := zerolog.ConsoleWriter{
+			Out:        os.Stderr,
+			NoColor:    !verbose,
+			TimeFormat: time.Kitchen,
+		}
 
-	// Configure timestamp output
-	if !verbose {
-		zconfig.PartsExclude = []string{zerolog.TimestampFieldName}
-	}
+		if !verbose {
+			consoleWriter.PartsExclude = []string{zerolog.TimestampFieldName}
+		}
 
-	zlog := zerolog.New(zconfig).Level(zerolog.InfoLevel)
+		zlog = zerolog.New(consoleWriter).With().Timestamp().Logger()
+	}
 
 	if verbose {
 		zlog = zlog.Level(zerolog.DebugLevel)
+	} else {
+		zlog = zlog.Level(zerolog.InfoLevel)
 	}
-
-	zlog = zlog.With().Timestamp().Logger()
 
 	gcrLog.Warn.SetOutput(io.Discard)
 
