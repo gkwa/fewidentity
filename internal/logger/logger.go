@@ -2,6 +2,8 @@ package logger
 
 import (
 	"io"
+	"os"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/go-logr/logr"
@@ -13,16 +15,32 @@ import (
 
 func NewConsoleLogger(verbose bool, jsonFormat bool) logr.Logger {
 	color.NoColor = !verbose
-	zconfig := zerolog.ConsoleWriter{Out: color.Error, NoColor: !verbose}
-	if jsonFormat {
-		zconfig = zerolog.ConsoleWriter{Out: color.Error, NoColor: true}
+	zconfig := zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		NoColor:    !verbose,
+		TimeFormat: time.Kitchen,
 	}
 
-	zlog := zerolog.New(zconfig).With().Timestamp().Logger()
+	if jsonFormat {
+		zconfig.NoColor = true
+	}
+
+	// Configure timestamp output
+	if !verbose {
+		zconfig.PartsExclude = []string{zerolog.TimestampFieldName}
+	}
+
+	zlog := zerolog.New(zconfig).Level(zerolog.InfoLevel)
+
+	if verbose {
+		zlog = zlog.Level(zerolog.DebugLevel)
+	}
+
+	zlog = zlog.With().Timestamp().Logger()
 
 	gcrLog.Warn.SetOutput(io.Discard)
 
-	zerologr.VerbosityFieldName = ""
+	zerologr.VerbosityFieldName = "v"
 	log := zerologr.New(&zlog)
 
 	runtimeLog.SetLogger(log)
