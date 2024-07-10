@@ -16,27 +16,29 @@ builds:
   id: {{ cookiecutter.project_slug }}
   ldflags:
   - -s -w
-    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Version={{ .Version }}"
-    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Date={{ .CommitDate }}"
-    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.GoVersion={{ .Env.GOVERSION }}"
-    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.ShortGitSHA={{ .ShortCommit }}"
-    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.FullGitSHA={{ .FullCommit }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Version={{ "{{" }} .Version {{ "}}" }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.Date={{ "{{" }} .CommitDate {{ "}}" }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.GoVersion={{ "{{" }} .Env.GOVERSION {{ "}}" }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.ShortGitSHA={{ "{{" }} .ShortCommit {{ "}}" }}"
+    -X "github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version.FullGitSHA={{ "{{" }} .FullCommit {{ "}}" }}"
 archives:
 - format: tar.gz
   name_template: |-
-    {{ cookiecutter.project_slug }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64
+    {{ cookiecutter.project_slug }}_ {% raw %}{{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64
                                {{- else if eq .Arch "386" }}i386
                                {{- else }}
                                {{ .Arch }}
                                {{ end }}
-                               {{- if .Arm }}v{{ .Arm }}{{ end }}
+                               {{- if .Arm }}v{{ .Arm }}{{ end }}{% endraw %}
   format_overrides:
   - goos: windows
     format: zip
 checksum:
   name_template: checksums.txt
+{% raw -%}
 snapshot:
   name_template: '{{ incpatch .Version }}-next'
+{%- endraw %}
 changelog:
   sort: asc
   filters:
@@ -49,7 +51,7 @@ brews:
   homepage: https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}
   repository:
     owner: {{ cookiecutter.github_username }}
-    name: homebrew-tools
+    name: {{ cookiecutter.homebrew_tap }}
     branch: main
 scoops:
 - name: {{ cookiecutter.project_slug }}
@@ -58,5 +60,5 @@ scoops:
   license: MIT
   repository:
     owner: {{ cookiecutter.github_username }}
-    name: scoop-bucket
+    name: {{ cookiecutter.scoop_bucket }}
     branch: master
