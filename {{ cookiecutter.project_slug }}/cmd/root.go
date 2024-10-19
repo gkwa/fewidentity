@@ -14,7 +14,7 @@ import (
 
 var (
 	cfgFile   string
-	verbose   bool
+	verbose   int
 	logFormat string
 	cliLogger logr.Logger
 )
@@ -47,7 +47,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.{{ cookiecutter.project_slug }}.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose mode")
+	rootCmd.PersistentFlags().CountVarP(&verbose, "verbose", "v", "increase verbosity")
 	rootCmd.PersistentFlags().StringVar(&logFormat, "log-format", "", "json or text (default is text)")
 
 	if err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose")); err != nil {
@@ -79,7 +79,7 @@ func initConfig() {
 	}
 
 	logFormat = viper.GetString("log-format")
-	verbose = viper.GetBool("verbose")
+	verbose = viper.GetInt("verbose")
 }
 
 func LoggerFrom(ctx context.Context, keysAndValues ...interface{}) logr.Logger {
