@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gkwa/bluefear/internal/logger"
+	"github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/internal/logger"
 )
 
 func TestCustomLogger(t *testing.T) {
