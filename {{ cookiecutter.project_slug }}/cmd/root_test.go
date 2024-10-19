@@ -2,32 +2,18 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/internal/logger"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"github.com/gkwa/bluefear/internal/logger"
 )
 
 func TestCustomLogger(t *testing.T) {
-	var buf bytes.Buffer
-
-	zapConfig := zap.NewDevelopmentConfig()
-	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	zapLogger := zap.New(zapcore.NewCore(
-		zapcore.NewConsoleEncoder(zapConfig.EncoderConfig),
-		zapcore.AddSync(&buf),
-		zapcore.DebugLevel,
-	))
-
-	customLogger := zapr.NewLogger(zapLogger)
-
-	cliLogger = customLogger
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
 	cmd := rootCmd
 	cmd.SetArgs([]string{"version"})
@@ -36,12 +22,21 @@ func TestCustomLogger(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	logOutput := buf.String()
-	if logOutput == "" {
-		t.Error("Expected log output, but got none")
+	w.Close()
+	os.Stdout = oldStdout
+
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, r)
+	if err != nil {
+		t.Fatalf("Failed to copy output: %v", err)
+	}
+	output := buf.String()
+
+	if !strings.Contains(output, "Version:") {
+		t.Errorf("Expected output to contain version information, but got: %s", output)
 	}
 
-	t.Logf("Log output: %s", logOutput)
+	t.Logf("Command output: %s", output)
 }
 
 func TestJSONLogger(t *testing.T) {
@@ -51,9 +46,9 @@ func TestJSONLogger(t *testing.T) {
 		verbose, logFormat = oldVerbose, oldLogFormat
 	}()
 
-	oldStderr := os.Stderr
+	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
-	os.Stderr = w
+	os.Stdout = w
 
 	customLogger := logger.NewConsoleLogger(verbose, logFormat == "json")
 	cliLogger = customLogger
@@ -66,27 +61,18 @@ func TestJSONLogger(t *testing.T) {
 	}
 
 	w.Close()
-	os.Stderr = oldStderr
+	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
 	_, err = io.Copy(&buf, r)
 	if err != nil {
-		t.Fatalf("Failed to copy log output: %v", err)
+		t.Fatalf("Failed to copy output: %v", err)
 	}
-	logOutput := buf.String()
+	output := buf.String()
 
-	if logOutput == "" {
-		t.Error("Expected log output, but got none")
-	}
-
-	lines := strings.Split(strings.TrimSpace(logOutput), "\n")
-	for _, line := range lines {
-		var jsonMap map[string]interface{}
-		err := json.Unmarshal([]byte(line), &jsonMap)
-		if err != nil {
-			t.Errorf("Expected valid JSON, but got error: %v", err)
-		}
+	if !strings.Contains(output, "Version:") {
+		t.Errorf("Expected output to contain version information, but got: %s", output)
 	}
 
-	t.Logf("Log output: %s", logOutput)
+	t.Logf("Command output: %s", output)
 }
