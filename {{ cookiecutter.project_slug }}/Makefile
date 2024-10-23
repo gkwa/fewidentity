@@ -1,5 +1,5 @@
 BIN := {{ cookiecutter.project_slug }}
-PREFIX := github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version
+PREFIX := github.com/{{ cookiecutter.github_username }}/$(BIN)/version
 
 SRC := $(shell find . -name '*.go')
 
