@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	
-	"github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version"
 	"github.com/spf13/cobra"
+	"github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/version"
 )
 
 var versionCmd = &cobra.Command{
