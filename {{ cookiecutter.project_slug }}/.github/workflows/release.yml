@@ -6,7 +6,8 @@ name: Release
 permissions:
   contents: write
 jobs:
-  build:
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
