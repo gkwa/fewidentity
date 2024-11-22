@@ -19,8 +19,8 @@ jobs:
         - windows-latest
     runs-on: {%raw%}${{ matrix.os }}{%endraw%}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5
       with:
         go-version: '>=1.21'
     - name: Set GOVERSION environment variable (Linux/macOS)
@@ -34,13 +34,13 @@ jobs:
         go build -v
         go test ./...
     - name: Run staticcheck
-      uses: dominikh/staticcheck-action@v1.3.1
+      uses: dominikh/staticcheck-action@fe1dd0c3658873b46f8c9bb3291096a617310ca6 # v1.3.1
       with:
         version: latest
         install-go: false
     - name: Run GoReleaser
       if: runner.os == 'Linux'
-      uses: goreleaser/goreleaser-action@v6
+      uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6
       with:
         args: release --snapshot --skip=publish --clean
     - name: Colored Output Test
